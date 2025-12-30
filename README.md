@@ -11,7 +11,7 @@
 
 ## 系统要求
 
-- Python 3.6+
+- Python 3.10+
 - 有效的 SMTP 邮箱账户（QQ 邮箱、Gmail、163 等）
 
 ## 安装配置
@@ -23,6 +23,34 @@
 - Linux: `~/.codex/`
 
 ### 步骤 2: 安装 Python 依赖
+
+本项目支持两种依赖管理方式：
+
+#### 方式 1: 使用 uv（推荐）
+
+[uv](https://github.com/astral-sh/uv) 是一个快速的 Python 包管理器，推荐使用。
+
+**安装 uv：**
+
+Windows (PowerShell):
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+Linux/macOS:
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+**安装项目依赖：**
+
+```bash
+uv sync
+```
+
+这会自动创建虚拟环境并安装所有依赖。
+
+#### 方式 2: 使用传统 pip
 
 ```bash
 pip install -r requirements.txt
@@ -86,7 +114,11 @@ QQ邮箱需要使用授权码，而不是QQ密码：
 model = "gpt-5.1-codex-max"
 
 # 配置邮件通知（注意：notify 必须在最顶层，不能在任何 [section] 下面）
-notify = ["python", "C:\\Users\\<用户名>\\.codex\\notify_mail.py"]
+# 如果使用 uv，可以使用 uv run 来运行脚本
+notify = ["uv", "run", "C:\\Users\\<用户名>\\.codex\\notify_mail.py"]
+
+# 或者使用传统 Python 命令
+# notify = ["python", "C:\\Users\\<用户名>\\.codex\\notify_mail.py"]
 
 [history]
 persistence = "save-all"
@@ -102,7 +134,11 @@ notifications = ["agent-turn-complete"]
 model = "gpt-5.1-codex-max"
 
 # 配置邮件通知（注意：notify 必须在最顶层，不能在任何 [section] 下面）
-notify = ["/usr/bin/python3", "/home/<用户名>/.codex/notify_mail.py"]
+# 如果使用 uv，可以使用 uv run 来运行脚本
+notify = ["uv", "run", "/home/<用户名>/.codex/notify_mail.py"]
+
+# 或者使用传统 Python 命令
+# notify = ["/usr/bin/python3", "/home/<用户名>/.codex/notify_mail.py"]
 
 [history]
 persistence = "save-all"
@@ -115,7 +151,8 @@ notifications = ["agent-turn-complete"]
 - `notify` 配置必须放在配置文件最顶层，在任何 `[section]` 标记之前
 - 将路径中的 `<用户名>` 替换为你的实际用户名
 - Windows 路径使用双反斜杠 `\\` 或单斜杠 `/`
-- Linux 使用完整的 Python 解释器路径
+- 如果使用 uv，确保 uv 已添加到系统 PATH
+- 使用 `uv run` 会自动使用项目的虚拟环境
 - `.env` 文件必须与 `notify_mail.py` 在同一目录下
 
 ## 测试配置
@@ -124,12 +161,19 @@ notifications = ["agent-turn-complete"]
 
 在配置完成后，可以手动测试脚本是否能正常发送邮件：
 
-**Windows (PowerShell):**
+**使用 uv（推荐）：**
+```bash
+uv run test_notify.py
+```
+
+**使用传统 Python：**
+
+Windows (PowerShell):
 ```powershell
 python test_notify.py
 ```
 
-**Linux (Bash):**
+Linux (Bash):
 ```bash
 python3 test_notify.py
 ```
@@ -186,9 +230,20 @@ python3 test_notify.py
 
 ### 问题：Windows 上找不到 Python 命令
 
-在 `config.toml` 中尝试使用完整路径或其他命令：
-- `python` → `python3` 或 `py`
-- 或使用完整路径：`C:\\Python39\\python.exe`
+在 `config.toml` 中尝试以下方案：
+
+1. **使用 uv（推荐）：**
+   ```toml
+   notify = ["uv", "run", "C:\\Users\\<用户名>\\.codex\\notify_mail.py"]
+   ```
+
+2. **使用其他 Python 命令：**
+   - `python` → `python3` 或 `py`
+   - 或使用完整路径：`C:\\Python39\\python.exe`
+
+### 问题：使用 uv 时提示找不到依赖
+
+确保在项目目录下运行过 `uv sync`，这会创建虚拟环境并安装依赖。如果使用 `uv run`，它会自动使用项目的虚拟环境。
 
 ## 高级配置
 
@@ -237,7 +292,31 @@ msg['To'] = TO_EMAIL  # 保持不变，SMTP 会自动处理
 - `test_notify.py` - 测试脚本，验证邮件配置
 - `.env` - 环境变量配置文件（需手动创建）
 - `env.example` - 环境变量配置示例
-- `requirements.txt` - Python 依赖包列表
+- `pyproject.toml` - 项目配置文件（uv 使用）
+
+## 快速开始（使用 uv）
+
+如果你使用 uv 包管理器，只需以下几步：
+
+```bash
+# 1. 进入项目目录
+cd ~/.codex  # Linux
+# 或 cd C:\Users\<用户名>\.codex  # Windows
+
+# 2. 安装依赖
+uv sync
+
+# 3. 复制并配置环境变量
+cp env.example .env  # Linux
+# 或 copy env.example .env  # Windows
+
+# 4. 编辑 .env 文件，填入邮箱配置
+
+# 5. 测试配置
+uv run test_notify.py
+
+# 6. 在 config.toml 中配置 notify 使用 uv run
+```
 
 ## 许可证
 
