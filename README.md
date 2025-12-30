@@ -115,15 +115,8 @@ model = "gpt-5.1-codex-max"
 
 # 配置邮件通知（注意：notify 必须在最顶层，不能在任何 [section] 下面）
 
-# 方式 1: 使用 uv run（推荐，需要指定项目目录）
+#使用 uv run
 notify = ["uv", "run", "--directory", "C:\\Users\\<用户名>\\.codex", "notify_mail.py"]
-
-# 方式 2: 使用 uv 创建的虚拟环境中的 Python（最可靠）
-# 先运行 uv sync，然后使用虚拟环境的 Python
-# notify = ["C:\\Users\\<用户名>\\.codex\\.venv\\Scripts\\python.exe", "C:\\Users\\<用户名>\\.codex\\notify_mail.py"]
-
-# 方式 3: 使用传统 Python 命令
-# notify = ["python", "C:\\Users\\<用户名>\\.codex\\notify_mail.py"]
 
 [history]
 persistence = "save-all"
@@ -222,12 +215,7 @@ msg['To'] = TO_EMAIL  # 保持不变，SMTP 会自动处理
 
 参考链接：https://kanman.de/en/posts/codex-desktop-notifications/
 
-## 安全提示
 
-- `.env` 文件包含敏感信息，已被添加到 `.gitignore` 中
-- 请勿将 `.env` 文件提交到版本控制系统
-- 如需分享配置，请使用 `env.example` 文件
-- 定期更换邮箱授权码以保障安全
 
 ## 文件说明
 
@@ -268,13 +256,7 @@ uv run --directory ~/.codex test_notify.py
 # 推荐使用方式 1（--directory）或方式 2（.venv Python）
 ```
 
-**uv sync 创建的虚拟环境位置：**
-- Linux: `~/.codex/.venv/bin/python`
-- Windows: `C:\Users\<用户名>\.codex\.venv\Scripts\python.exe`
 
-## 许可证
-
-本项目代码可自由使用和修改。
 
 ## 参考资料
 
