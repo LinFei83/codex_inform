@@ -24,10 +24,16 @@ EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 TO_EMAIL = os.getenv("TO_EMAIL")
 
 def trunc(text, limit):
-    """截断文本"""
+    """截断文本，在单词边界处截断"""
     if len(text) <= limit:
         return text
-    return text[:limit-3] + "..."
+    cut = max(0, limit - 3)
+    head = text[:cut]
+    # 回退到最后一个空格，避免截断单词
+    last_space = head.rfind(' ')
+    if last_space > 0:
+        head = head[:last_space]
+    return head + "..."
 
 def get_machine_info():
     """获取机器信息"""
@@ -56,15 +62,27 @@ def format_email_content(payload):
         if "## My request for Codex:" in msg:
             # 提取用户请求部分
             lines = msg.split("\n")
-            for i, line in enumerate(lines):
-                if "## My request for Codex:" in line:
-                    # 找到用户实际请求（通常是下一行开始）
-                    for req_line in lines[i+1:]:
-                        if req_line.strip() and not req_line.startswith("## "):
-                            last_request = req_line.strip()
-                            break
-                    break
-            if last_request:
+            capture = False
+            request_lines = []
+            
+            for line in lines:
+                if capture:
+                    # 继续捕获，直到遇到新的 ## 标记或空白部分
+                    stripped = line.strip()
+                    if stripped:
+                        if not stripped.startswith("## "):
+                            request_lines.append(stripped)
+                        else:
+                            break  # 遇到新的标记，停止捕获
+                elif "## My request for Codex:" in line:
+                    capture = True
+                    # 如果同一行有内容，也提取
+                    after_marker = line.split("## My request for Codex:", 1)[1].strip()
+                    if after_marker:
+                        request_lines.append(after_marker)
+            
+            if request_lines:
+                last_request = " ".join(request_lines)
                 break
     
     # 提取助手回复

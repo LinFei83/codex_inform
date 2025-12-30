@@ -23,14 +23,14 @@ def test_email_config():
     print(f"密码已配置: {'是' if EMAIL_PASSWORD else '否'}\n")
     
     if not all([EMAIL_USER, EMAIL_PASSWORD, TO_EMAIL]):
-        print("❌ 错误: 环境变量配置不完整！")
+        print("[错误] 环境变量配置不完整！")
         print("请检查 .env 文件，确保以下变量都已配置：")
         print("  - EMAIL_USER")
         print("  - EMAIL_PASSWORD")
         print("  - TO_EMAIL")
         return False
     
-    print("✓ 环境变量配置完整\n")
+    print("[成功] 环境变量配置完整\n")
     return True
 
 def test_email_send():
@@ -63,10 +63,10 @@ def test_email_send():
     if response == 'y':
         print("\n正在发送测试邮件...")
         if send_email(subject, body):
-            print("✓ 测试邮件发送成功！请检查收件箱。")
+            print("[成功] 测试邮件发送成功！请检查收件箱。")
             return True
         else:
-            print("✗ 测试邮件发送失败，请检查配置和网络连接。")
+            print("[失败] 测试邮件发送失败，请检查配置和网络连接。")
             return False
     else:
         print("已取消发送测试邮件。")
@@ -81,15 +81,17 @@ def main():
     # 检查 .env 文件是否存在
     env_file = Path(__file__).parent / '.env'
     if not env_file.exists():
-        print("❌ 错误: .env 文件不存在！\n")
+        print("[错误] .env 文件不存在！\n")
         print("请先创建 .env 文件：")
         print("  1. 复制 env.example 为 .env")
         print("  2. 编辑 .env 文件，填入实际的邮箱配置\n")
         print("Windows 命令:")
         print("  copy env.example .env\n")
+        print("Linux 命令:")
+        print("  cp env.example .env\n")
         return 1
     
-    print("✓ 找到 .env 配置文件\n")
+    print("[成功] 找到 .env 配置文件\n")
     
     # 测试配置
     if not test_email_config():
@@ -100,9 +102,9 @@ def main():
     
     print("\n" + "=" * 60)
     if result is True:
-        print("✓ 所有测试通过！邮件通知功能正常。")
+        print("[成功] 所有测试通过！邮件通知功能正常。")
     elif result is False:
-        print("✗ 测试失败，请检查配置和错误信息。")
+        print("[失败] 测试失败，请检查配置和错误信息。")
     else:
         print("测试已取消。")
     print("=" * 60 + "\n")
