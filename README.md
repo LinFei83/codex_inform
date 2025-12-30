@@ -114,10 +114,15 @@ QQ邮箱需要使用授权码，而不是QQ密码：
 model = "gpt-5.1-codex-max"
 
 # 配置邮件通知（注意：notify 必须在最顶层，不能在任何 [section] 下面）
-# 如果使用 uv，可以使用 uv run 来运行脚本
-notify = ["uv", "run", "C:\\Users\\<用户名>\\.codex\\notify_mail.py"]
 
-# 或者使用传统 Python 命令
+# 方式 1: 使用 uv run（推荐，需要指定项目目录）
+notify = ["uv", "run", "--directory", "C:\\Users\\<用户名>\\.codex", "notify_mail.py"]
+
+# 方式 2: 使用 uv 创建的虚拟环境中的 Python（最可靠）
+# 先运行 uv sync，然后使用虚拟环境的 Python
+# notify = ["C:\\Users\\<用户名>\\.codex\\.venv\\Scripts\\python.exe", "C:\\Users\\<用户名>\\.codex\\notify_mail.py"]
+
+# 方式 3: 使用传统 Python 命令
 # notify = ["python", "C:\\Users\\<用户名>\\.codex\\notify_mail.py"]
 
 [history]
@@ -134,11 +139,10 @@ notifications = ["agent-turn-complete"]
 model = "gpt-5.1-codex-max"
 
 # 配置邮件通知（注意：notify 必须在最顶层，不能在任何 [section] 下面）
-# 如果使用 uv，可以使用 uv run 来运行脚本
-notify = ["uv", "run", "/home/<用户名>/.codex/notify_mail.py"]
 
-# 或者使用传统 Python 命令
-# notify = ["/usr/bin/python3", "/home/<用户名>/.codex/notify_mail.py"]
+# 使用 uv run
+notify = ["uv", "run", "--directory", "/home/<用户名>/.codex", "notify_mail.py"]
+
 
 [history]
 persistence = "save-all"
@@ -147,13 +151,7 @@ persistence = "save-all"
 notifications = ["agent-turn-complete"]
 ```
 
-**重要说明：**
-- `notify` 配置必须放在配置文件最顶层，在任何 `[section]` 标记之前
-- 将路径中的 `<用户名>` 替换为你的实际用户名
-- Windows 路径使用双反斜杠 `\\` 或单斜杠 `/`
-- 如果使用 uv，确保 uv 已添加到系统 PATH
-- 使用 `uv run` 会自动使用项目的虚拟环境
-- `.env` 文件必须与 `notify_mail.py` 在同一目录下
+
 
 ## 测试配置
 
@@ -166,17 +164,6 @@ notifications = ["agent-turn-complete"]
 uv run test_notify.py
 ```
 
-**使用传统 Python：**
-
-Windows (PowerShell):
-```powershell
-python test_notify.py
-```
-
-Linux (Bash):
-```bash
-python3 test_notify.py
-```
 
 如果配置正确，你应该能收到一封测试邮件。
 
@@ -200,50 +187,6 @@ python3 test_notify.py
 - **时间戳**: 任务完成的时间
 - **执行结果**: Codex 的回复摘要（最多显示前 3 个要点）
 
-## 故障排查
-
-### 问题：没有收到邮件通知
-
-1. **检查环境变量配置**
-   - 确认 `.env` 文件存在且配置正确
-   - 运行 `test_notify.py` 检查配置
-
-2. **检查 Codex 配置**
-   - 确认 `config.toml` 中的 `notify` 路径正确
-   - 确认 `notify` 配置在顶层，不在任何 `[section]` 内
-   - Windows 路径使用双反斜杠或单斜杠
-
-3. **检查邮箱设置**
-   - QQ 邮箱：确认已开启 IMAP/SMTP 服务并获取授权码
-   - Gmail：需要开启"不够安全的应用访问权限"或使用应用专用密码
-   - 检查防火墙是否阻止 SMTP 端口（587）
-
-4. **查看错误日志**
-   - 运行 Codex 时查看终端输出
-   - 脚本会打印错误信息到标准输出
-
-### 问题：邮件发送但格式不对
-
-- 检查 Python 版本（需要 3.6+）
-- 确认 `python-dotenv` 已正确安装
-- 尝试手动运行测试脚本查看详细错误
-
-### 问题：Windows 上找不到 Python 命令
-
-在 `config.toml` 中尝试以下方案：
-
-1. **使用 uv（推荐）：**
-   ```toml
-   notify = ["uv", "run", "C:\\Users\\<用户名>\\.codex\\notify_mail.py"]
-   ```
-
-2. **使用其他 Python 命令：**
-   - `python` → `python3` 或 `py`
-   - 或使用完整路径：`C:\\Python39\\python.exe`
-
-### 问题：使用 uv 时提示找不到依赖
-
-确保在项目目录下运行过 `uv sync`，这会创建虚拟环境并安装依赖。如果使用 `uv run`，它会自动使用项目的虚拟环境。
 
 ## 高级配置
 
@@ -303,7 +246,7 @@ msg['To'] = TO_EMAIL  # 保持不变，SMTP 会自动处理
 cd ~/.codex  # Linux
 # 或 cd C:\Users\<用户名>\.codex  # Windows
 
-# 2. 安装依赖
+# 2. 安装依赖（会创建 .venv 虚拟环境）
 uv sync
 
 # 3. 复制并配置环境变量
@@ -315,8 +258,19 @@ cp env.example .env  # Linux
 # 5. 测试配置
 uv run test_notify.py
 
-# 6. 在 config.toml 中配置 notify 使用 uv run
+# 6. 从其他目录测试（验证跨目录调用）
+cd /tmp
+uv run --directory ~/.codex test_notify.py
+# 或使用虚拟环境 Python
+~/.codex/.venv/bin/python ~/.codex/test_notify.py
+
+# 7. 在 config.toml 中配置 notify
+# 推荐使用方式 1（--directory）或方式 2（.venv Python）
 ```
+
+**uv sync 创建的虚拟环境位置：**
+- Linux: `~/.codex/.venv/bin/python`
+- Windows: `C:\Users\<用户名>\.codex\.venv\Scripts\python.exe`
 
 ## 许可证
 

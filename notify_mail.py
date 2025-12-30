@@ -112,8 +112,6 @@ def format_email_content(payload):
     else:
         body += trunc(assistant_msg, 300) + "\n"
     
-    # 如果有详细信息可以链接到本地日志
-    body += f"\n详细执行信息保存在本地日志中。"
     
     return subject, body
 
