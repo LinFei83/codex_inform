@@ -1,0 +1,16 @@
+# Common Codex config
+# Add your common TOML configuration here
+notify = ["uv", "run", "--directory", "E:\\Desktop\\codex_inform", "notify_mail.py"]
+
+model_provider = "custom"
+model = "gpt-5.1-codex-max"
+model_reasoning_effort = "high"
+disable_response_storage = true
+
+[model_providers.custom]
+name = "custom"
+wire_api = "responses"
+requires_openai_auth = true
+base_url = "https://*********/v1"
+
+

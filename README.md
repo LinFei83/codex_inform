@@ -110,6 +110,8 @@ QQ邮箱需要使用授权码，而不是QQ密码：
 **Windows 系统：**
 配置文件位置：`C:\Users\<用户名>\.codex\config.toml`
 
+例子: `example\win\config.toml`
+
 ```toml
 model = "gpt-5.1-codex-max"
 
@@ -127,6 +129,8 @@ notifications = ["agent-turn-complete"]
 
 **Linux 系统：**
 配置文件位置：`~/.codex/config.toml`
+
+例子: `example/ubuntu/config.toml`
 
 ```toml
 model = "gpt-5.1-codex-max"

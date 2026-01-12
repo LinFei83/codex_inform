@@ -1,0 +1,3 @@
+model = "gpt-5.1-codex-max"
+notify = ["uv", "run", "--directory", "/home/lf/project/codex_inform", "notify_mail.py"]
+model_reasoning_effort = "medium"
